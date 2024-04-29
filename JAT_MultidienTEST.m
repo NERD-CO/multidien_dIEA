@@ -5,6 +5,8 @@ pcNAME = getenv('COMPUTERNAME');
 switch pcNAME
     case 'DESKTOP-EGFQKAI'
         mainLOC = 'C:\Users\johna\OneDrive\Documents\Github\multidien_dIEA';
+    case 'DESKTOP-FAGRV5G'
+        mainLOC = 'C:\Users\Admin\Documents\Github\multidien_dIEA';
 
     otherwise
 
@@ -34,6 +36,22 @@ xlabel('days since implant')
 ylabel('detections')
 
 %%
+skipDATA = floor(diff(histo_days_since_implant));
+startIND = find(skipDATA) + 1;
+stopIND = startIND + skipDATA(find(skipDATA));
+
+part1 = histo_detections_preZ(1:startIND(1)-1);
+part1a = nan(stopIND(1)-startIND(1),1)
+part2 = histo_detections_preZ(stopIND(1)+1:startIND(2)-1)
+part2a = nan(stopIND(2)-startIND(2),1)
+part3 = histo_detections_preZ(stopIND(2)+1:startIND(3)-1)
+part3a = nan(stopIND(3)-startIND(3),1)
+part4 = histo_detections_preZ(stopIND(3)+1:end)
+
+allParts = [part1 ; part1a ; part2 ; part2a ; part3 ; part3a; part4]
+
+
+%%
 
 epoch_edges = data_fooof.epoch_days;
 epoch_edges = vertcat(epoch_edges,min(histo_days_since_implant),max(histo_days_since_implant)+1);
@@ -61,15 +79,84 @@ end
 
 %%
 
-hdzS = smoothdata(histo_detections_zScored,'gaussian',30);
+hdzS = smoothdata(histo_detections_zScored,'gaussian',50);
+close
+[u1,d] = envelope(hdzS,50,'rms');
 
-close all
+[u2,d] = envelope(hdzS,10,'peak');
+
+figure;
 % disp(any(isnan(histo_detections_zScored)))
 plot(hdzS)
+hold on
+plot(u1)
+plot(u2)
+
+yline(mean(u2)-(std(u2)*0.3))
+
+peakENV1 = u2;
+peakENV1(u2 <  mean(u2)-(std(u2)*0.3)) = 0;
+plot(peakENV1)
+legend('Raw','RMS','Peak')
+%%
+plot(peakENV1)
+
+N = numel(peakENV1);   % Number of data points
+fftResult = fft(peakENV1);   % Compute FFT
+
+% Calculate the two-sided spectrum and then the single-sided spectrum
+P2 = abs(fftResult/N);
+P1 = P2(1:N/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+
+Fs = 0.24;  % Sampling frequency (times per day)
+f = Fs*(0:(N/2))/N;  % Frequency vector
+
+% [peakValues, peakLocations] = findpeaks(P1, 'MinPeakHeight', threshold);
+[peakValues, peakLocations] = findpeaks(P1, 'MinPeakHeight', 0.3);
+peakFrequencies = f(peakLocations);  % Frequencies corresponding to the found peaks
+
+
+figure;
+plot(f, P1);
+title('Single-Sided Amplitude Spectrum of Data');
+xlabel('Frequency (cycles per day)');
+ylabel('|P1(f)|');
+hold on;
+plot(peakFrequencies, peakValues, 'r*', 'MarkerSize', 10); % Mark peaks
+hold off;
+
+
+%%
+[pxx,f] = periodogram(peakENV1,[],[],1);
+pow2plot = pow2db(pxx);
+% plot(f,10*log10(pxx))
+plot(f(5:end),pow2plot(5:end))
+pow2plotS = smoothdata(pow2plot,'sgolay',120)
+
+xlabel('Cycles/Day')
+ylabel('dB / (Cycles/Year)')
+
+%%
+histo_days_since_implant2 = histo_days_since_implant(8:end)
+allParts2 = allParts(5:end)
+histo_days_since_implant2 = days(histo_days_since_implant2)
+
+oneday = seconds(days(1));
+
+[pxx,f] = plomb(allParts2,histo_days_since_implant2,0.0417,10,'normalized');
+
+f = f*oneday;
+
+[pmax,lmax] = max(pxx);
+f0 = f(lmax);
+
+plot(f,pxx,f0,pmax,'o')
+xlabel('Frequency (day^{-1})')
 
 %%
 close all
-[pxx,w] = periodogram(histo_detections_zScored);
+[pxx,w] = periodogram(hdzS);
 pow2plot = pow2db(pxx);
 pow2plotS = smoothdata(pow2plot,'sgolay',120);
 
