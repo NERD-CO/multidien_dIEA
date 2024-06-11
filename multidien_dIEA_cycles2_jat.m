@@ -13,14 +13,25 @@ for iHistogram = 1:length(filenames_histograms) % label histogram file list with
 end
 clear iHistogram
 
+%%
+
+%%
+fooof_fileN = '10162654_fooof.mat';
+% load(fooof_fileN)
+
+%%
+histo_fileN = 'UColorado_AAB_10162654_Histogram_Hourly.csv';
+
 %% PER-PARTICIPANT ANALYSIS
 
 % for iParticipant = 1:length(filenames_foof)
-iParticipant = 1; %%%% temp
-data_fooof = load(filenames_fooof(iParticipant).name);
-histogram_row = find(filenames_histograms_ID==data_fooof.ID);
-data_histogram = readtable(strcat('Histograms/',filenames_histograms(histogram_row).name));
-clear histogram_row
+% iParticipant = 1; %%%% temp
+% data_fooof = load(filenames_fooof(iParticipant).name);
+data_fooof = load(fooof_fileN);
+% histogram_row = find(filenames_histograms_ID==data_fooof.ID);
+% data_histogram = readtable(strcat('Histograms/',filenames_histograms(histogram_row).name));
+data_histogram = readtable(histo_fileN);
+% clear histogram_row
 histo_days_since_implant = days(data_histogram.RegionStartTime - data_fooof.metadata.Implant);
 % don't worry that some values are negative - these are pre-implant
 histo_detections_preZ = data_histogram.EpisodeStarts;
