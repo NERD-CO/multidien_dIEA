@@ -1,12 +1,14 @@
 clear
 close all
+%%
 
 %% INDEX FOOOF DATA
+cd('C:\Users\Admin\Documents\Github\multidien_dIEA\fooofFILES')
 filenames_fooof = dir('*_fooof.mat');
 
 %% INDEX HOURLY HISTOGRAMS
 addpath('Histograms') % add folder with histogram files to path
-filenames_histograms = dir('Histograms/*_Histogram_Hourly.csv');
+filenames_histograms = dir('C:\Users\Admin\Documents\Github\multidien_dIEA\Histograms/*_Histogram_Hourly.csv');
 
 for iHistogram = 1:length(filenames_histograms) % label histogram file list with PDMS IDs
     filenames_histograms_ID(iHistogram,1) = str2double(extract(filenames_histograms(iHistogram).name,digitsPattern));
