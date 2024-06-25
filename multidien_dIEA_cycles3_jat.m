@@ -19,7 +19,7 @@ load('aperiodic_periods.mat');
 
 %% PER-PARTICIPANT ANALYSIS
 
-for iParticipant = 1:length(filenames_foof)
+for iParticipant = 1:length(filenames_fooof)
     % iParticipant = 1; %%%% temp
     data_fooof = load(filenames_fooof(iParticipant).name);
     % data_fooof = load(fooof_fileN);

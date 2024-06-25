@@ -1,9 +1,9 @@
 function [] = inverseWaveForm_PLV_fun(iValu , peakIndices)
 signal = iValu;
-fs = 250;
+fs = 24*3;
 
 signal = signal(~isnan(signal));
-[cfs, ~] = cwt(signal, 'amor', fs);
+[cfs, freq_bins] = cwt(signal, 'amor', fs);
 
 % peakIndices needs to be a row vector of Frequency Identities
 % peakIndices = [20, 35]; 
